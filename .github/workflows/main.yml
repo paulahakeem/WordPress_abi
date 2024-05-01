@@ -8,10 +8,19 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+    outputs:
+      instanceids: ${{ steps.asg.outputs.instanceids }}
+      s3object: ${{ steps.object.outputs.s3object }}
+      
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
+      
+    - uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: ${{ env.AWS_REGION }}
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}      
       
     - name: Create archive
       run: |
