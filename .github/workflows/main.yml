@@ -22,6 +22,7 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}      
       
     - name: Create archive
+      id: object
       run: |
         git archive --format=tar.gz -o app_$(date +"%Y-%m-%d").tar.gz HEAD
         s3object=$(echo "app_${DATE}.tar.gz")
