@@ -9,7 +9,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      instanceids: ${{ steps.asg.outputs.instanceids }}
       s3object: ${{ steps.object.outputs.s3object }}
       
     steps:
@@ -25,7 +24,9 @@ jobs:
     - name: Create archive
       run: |
         git archive --format=tar.gz -o app_$(date +"%Y-%m-%d").tar.gz HEAD
-        
+        s3object=$(echo "app_${DATE}.tar.gz")
+        echo "s3object=$s3object" >> $GITHUB_OUTPUT
+        echo "S3 Object: $s3object"
     - name: Upload to S3
       run: |
         echo "Uploading to S3"
