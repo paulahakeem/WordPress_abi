@@ -10,37 +10,34 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      s3object: ${{ steps.object.outputs.s3object }}
+      s3object: ${{ steps.create_archive.outputs.archive_filename }}
       
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       
-    - uses: aws-actions/configure-aws-credentials@v4
+    - name: Set up AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-region: ${{ secrets.AWS_REGION }}
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}      
       
     - name: Create archive
-      id: object
+      id: create_archive
       run: |
         DATE=$(date +"%Y-%m-%d")
         git archive --format=tar.gz -o app_${DATE}.tar.gz HEAD
-        s3object="app_${DATE}.tar.gz"
-        echo "::set-output name=s3object::$s3object"
-        echo "S3 Object: $s3object"
+        echo "::set-output name=archive_filename::app_${DATE}.tar.gz"
       
     - name: Upload to S3
       run: |
         echo "Uploading to S3"
-        aws s3 cp app_${{ steps.object.outputs.s3object }} s3://${{ secrets.S3_BUCKET_NAME }}/
+        aws s3 cp app_${{ needs.build.outputs.s3object }} s3://${{ secrets.S3_BUCKET_NAME }}/
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
-
-
     
     - name: Set expiry policy on S3 bucket
       run: |
@@ -57,7 +54,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: aws-actions/configure-aws-credentials@v4
+    - name: Set up AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-region: ${{ secrets.AWS_REGION }}
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -68,10 +66,9 @@ jobs:
         PRIVATE_KEY: ${{ secrets.PRIVATE_KEY_PEM }}
       run: |
         # Get the instance IDs of instances in the Auto Scaling Group
-        export VMs=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name ${{ secrets.ASG_NAME }} --query 'AutoScalingGroups[].Instances[].InstanceId' --output text)
-        echo "VMs IDs: $VMs"
-        echo '${{ secrets.S3_BUCKET_NAME }}'
-        echo '${{ needs.build.outputs.s3object }}'
+        instance_ids=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name ${{ secrets.ASG_NAME }} --query 'AutoScalingGroups[].Instances[].InstanceId' --output text)
+        echo "VMs IDs: $instance_ids"
+        
         object_url=$(aws s3 presign s3://${{ secrets.S3_BUCKET_NAME }}/${{ needs.build.outputs.s3object }})
         echo "Object URL: $object_url"
 
@@ -91,5 +88,5 @@ jobs:
             sudo tar -xvzf ${{ needs.build.outputs.s3object }}
             sudo rm -rf ${{ needs.build.outputs.s3object }}
             sudo systemctl restart httpd
-          "
-        done     
+          " || true
+        done
