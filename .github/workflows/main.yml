@@ -1,5 +1,4 @@
 name: Deploy Application
-
 on:
   workflow_dispatch: {}
   push:
@@ -25,10 +24,9 @@ jobs:
     - name: Create archive
       run: |
         git archive --format=tar.gz -o app_$(date +"%Y-%m-%d").tar.gz HEAD
-        s3object=$(echo "app_$(date +"%Y-%m-%d").tar.gz")
-        echo "::set-output name=s3object::$s3object"
+        s3object=$(echo "app_${DATE}.tar.gz")
+        echo "s3object=$s3object" >> $GITHUB_OUTPUT
         echo "S3 Object: $s3object"
-      
     - name: Upload to S3
       run: |
         echo "Uploading to S3"
@@ -44,8 +42,7 @@ jobs:
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: ${{ secrets.AWS_REGION }}
-
+        AWS_REGION: ${{ secrets.AWS_REGION }} 
 ##########################################################################################################
 
   deploy:
@@ -58,10 +55,6 @@ jobs:
         aws-region: ${{ secrets.AWS_REGION }}
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-    - name: Debug
-      run: |
-        echo "Output from build job: ${{ needs.build.outputs.s3object }}"
 
     - name: Deploy to Auto Scaling Group
       env:
@@ -91,4 +84,4 @@ jobs:
             sudo rm -rf ${{ needs.build.outputs.s3object }}
             sudo systemctl restart httpd
           "
-        done
+        done     
