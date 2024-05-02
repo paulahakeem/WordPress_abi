@@ -59,7 +59,7 @@ jobs:
   
       - name: Deploy to Auto Scaling Group
         env:
-          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY_PEM }}
+          PRIVATE_KEY: ${{ secrets.EC2_KEY }}
   
         run: |
           echo "Pushing to ASG"
