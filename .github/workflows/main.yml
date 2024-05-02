@@ -65,34 +65,9 @@ jobs:
           echo "Pushing to ASG"
           instance_ids=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name ${{ secrets.ASG_NAME }} --query 'AutoScalingGroups[].Instances[].InstanceId' --output text)
           echo $instance_ids
-          echo "-----BEGIN RSA PRIVATE KEY-----
-          MIIEogIBAAKCAQEAinZ53lSwnp+rHpt/GilaVNM+IwBQet1Ij+qErnTR1wWnhRzE
-          VsygTB+q0y6vGk/HHTGS95blOm92PIcxp8DHFRS2hObpE1WL6r2/5JiThS0p/B5A
-          rfP4w1SHCxohyAuOKbDruW4tGGQiRiiGT5lNead6qJYIqH7cX4ssopjn2MiksVtb
-          KAik3Edrp5gvnbF4fN1Dbzw+8vQTbS0zsx+axvA5bUxCAFpC/9pND2VYGQgX/wVb
-          LFmwoKgEFsVE3MZlEQ6ZDRI4Zr5cr6lVaUE8XTqORqZGa3w3ysoACPfIKMY6Azpx
-          R+ru4Grwmu5GwBkh4nmeE1xhqsVgpRbFuv2/pwIDAQABAoIBAHxJ1SMpylDY6nXT
-          BsipDhjOdhxdD+D5+USWMvuWiTYGMVVfeS6hB9LNKj3ezfdEXWtrMI1mueU2YF/8
-          yynV9d6KdTvfOqDMTYgtQ68i9mi5HdLeJRkAwvAzU/U3Q9OZ68aotTACIiCe4dUw
-          Uz/oUI8/Mu9ZnfQBzDdHao2Zy6PfRT60SDoo2KUij2Yo5x3lDWUCZ/eVBjPdmiLp
-          ls1AjRVssI/dQKofbq3YiGT2K1hrADXZzCjD3BEzg1xvxJUGT4fq2ALRxT+UjcfZ
-          SrgPEqpIICVOdSDTrkvHOPXWToZIJBVtHK8Kvc2NuCd0QwGdbCf3CHR/uoW3YKAv
-          3sOJ+CECgYEAwKzsQcULPLisBkDOWXuGRgcQlO6hLJ8OdfRFoBrvQCZaLXJ6FD0J
-          A4GN1cY7CkEPToFjjiQ4WVhaqe28LMT+acl+1SOTWAILNTyqNVZR0mXGv6Gu9gIT
-          zHWd2WFEX9StTKCgUIzVMrM5czVztOPk7uLgS9vWVxZ8rkihnsVrxC0CgYEAt/hH
-          CJ0JVefadUpqCr3e6B/qddFMfXZCMUmcoiJUwjSxGwRIR+AtXo8Hqj79FIeT3ETT
-          R4LqtxWLzg3eE+lumIoHAFdBHgq7+S41nUquVf7JLSgLX5fusry8T1RypzLonQvp
-          XwvI5ff7sh26BhgC6ceoSgDC6q8U/Rt58Y7ik6MCgYBhVrsg2wA7U/ysSA83i70h
-          Ia6R3yCT32M52gdWxGS8XuPN8/iSwucL22ahaj0niAjIm3uFMu04zfc3w//+CiOR
-          pBcsbIWiv52T7qr6uToq9fn7lB5E8HW6JG1zhb06QMKwZLG5H/0RWRQcDRQAfeWJ
-          fhrcmBpn8tdYYR8tjAVOnQKBgBz2A9CyT/7rEfP28/ye6VFnfNRxT3ZMwJzbtsG7
-          X9Z2zw6uvOY7v0isgYtmgRbTRQ6e8xfF30dVJ/4XJsfBrrxqtjFyivi8vdy7Totl
-          b05wXqEyNaAl3djbZ1WhuK7jj8TxVBq3UzgIsuHWViuRahv9Z1vHBOhHCanSwn6p
-          fLe7AoGAZzNN64D5PU59fPLHd9t17rl/5E2arzcwMcJljb34kG/fBTVA8lqFp6lX
-          RaxRP+klsoXxxaLQ51b2crorpAMORpAy5ihinREtDYcKo8dQJaFnCA7PcLLzmKR8
-          SZ43yyerbnW7cWjXQzd0Rqk3FYVmROcxzI26xmiKhcQP/mXwbHA=
-          -----END RSA PRIVATE KEY-----" > PEM_FILE && chmod 400 PEM_FILE 
+          echo "${{ secrets.EC2_KEY }}" > PEM_FILE && chmod 400 PEM_FILE 
           echo $instance_ids 
+          ls 
           echo $(aws s3 ls)
           for instance_id in $instance_ids; do
             public_ip=$(aws ec2 describe-instances --instance-ids $instance_id --query 'Reservations[].Instances[].PublicIpAddress' --output text)
