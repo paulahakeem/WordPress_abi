@@ -66,7 +66,7 @@ jobs:
     - name: Generate presigned URL for S3 object
       id: presigned_url
       run: |
-         object_url=$(aws s3 presign s3://${{ secrets.S3_BUCKET }}/app_$(date +"%Y-%m-%d").tar.gz)
+         object_url=$(aws s3 presign s3://${{ secrets.S3_BUCKET_NAME }}/app_$(date +"%Y-%m-%d").tar.gz)
          echo "Object URL: $object_url"
          echo "::set-output name=url::$object_url"  # Set the URL as an output for later steps
       env:
@@ -89,7 +89,7 @@ jobs:
 
     - name: Set S3 bucket expiry policy
       run: |
-        aws s3api put-bucket-lifecycle-configuration --bucket ${{ secrets.S3_BUCKET }} --lifecycle-configuration '{"Rules":[{"ID":"DeleteObjectsAfter7Days","Prefix":"","Status":"Enabled","Expiration":{"Days":7}}]}'
+        aws s3api put-bucket-lifecycle-configuration --bucket ${{ secrets.S3_BUCKET_NAME }} --lifecycle-configuration '{"Rules":[{"ID":"DeleteObjectsAfter7Days","Prefix":"","Status":"Enabled","Expiration":{"Days":7}}]}'
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
