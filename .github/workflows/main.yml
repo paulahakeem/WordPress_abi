@@ -1,11 +1,11 @@
-# name: Deploy Application
-# on:
-#   workflow_dispatch: {}
-#   push:
-#     branches:
-#       - master
+name: Deploy Application
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - master
 
-# jobs:
+jobs:
 #   build:
 #     runs-on: ubuntu-latest
 #     outputs:
