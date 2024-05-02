@@ -51,7 +51,7 @@ jobs:
           public_ip=$(aws ec2 describe-instances --instance-ids $instance_id --query 'Reservations[].Instances[].PublicIpAddress' --output text)
   
           ssh -o StrictHostKeyChecking=no -i KEY_PEM ec2-user@$public_ip "
-            cd /var/www/html
+            cd /home/ec2-user
             aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/app_$(date +"%Y-%m-%d").tar.gz  .
             sudo tar -xzvf app_$(date +"%Y-%m-%d").tar.gz
             "
