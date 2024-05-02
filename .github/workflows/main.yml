@@ -66,8 +66,8 @@ jobs:
         echo "VMs IDs: $VMs"
         echo '${{ secrets.S3_BUCKET_NAME }}'
         echo '${{ needs.build.outputs.s3object }}'
-        object_url=$(aws s3 presign s3://${{ secrets.S3_BUCKET_NAME }}/${{ needs.build.outputs.s3object }})
-        echo "Object URL: $object_url"
+        # object_url=$(aws s3 presign s3://${{ secrets.S3_BUCKET_NAME }}/${{ needs.build.outputs.s3object }})
+        # echo "Object URL: $object_url"
         echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
         echo "s3object: ${{ needs.build.outputs.s3object }}"
         # Iterate over each instance
@@ -77,9 +77,12 @@ jobs:
           # SSH into the instance and download the object from the S3 bucket
           ssh -o StrictHostKeyChecking=no -i private_key ec2-user@$public_ip "
             cd /var/www/html
-            sudo wget \"$object_url\" -O ${{ needs.build.outputs.s3object }}
+            aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/app_$(date +"%Y-%m-%d").tar.gz  .
             sudo tar -xvzf ${{ needs.build.outputs.s3object }}
             sudo rm -rf ${{ needs.build.outputs.s3object }}
             sudo systemctl restart httpd
-          "
+            
+          
+            
+            "
         done     
