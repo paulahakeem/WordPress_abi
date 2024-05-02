@@ -65,7 +65,7 @@ jobs:
           echo "Pushing to ASG"
           instance_ids=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name ${{ secrets.ASG_NAME }} --query 'AutoScalingGroups[].Instances[].InstanceId' --output text)
           echo $instance_ids
-          echo "${{ secrets.EC2_KEY }}" > PEM_FILE.pem && chmod 400 PEM_FILE 
+          echo "${{ secrets.EC2_KEY }}" > PEM_FILE.pem && chmod 400 PEM_FILE.pem 
           echo $instance_ids 
           ls 
           echo $(aws s3 ls)
