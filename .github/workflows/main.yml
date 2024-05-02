@@ -52,7 +52,7 @@ jobs:
   
           ssh -o StrictHostKeyChecking=no -i KEY_PEM ec2-user@$public_ip "
             cd /home/ec2-user
-            aws s3 cp s3://${{ secrets.S3_BUCKET }}/app_$(date +"%Y-%m-%d").tar.gz  .
+            aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/app_$(date +"%Y-%m-%d").tar.gz  .
             sudo tar -xzvf app_$(date +"%Y-%m-%d").tar.gz
             sudo systemctl restart apache2
             "
