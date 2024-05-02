@@ -51,36 +51,11 @@ jobs:
           public_ip=$(aws ec2 describe-instances --instance-ids $instance_id --query 'Reservations[].Instances[].PublicIpAddress' --output text)
   
           ssh -o StrictHostKeyChecking=no -i KEY_PEM ec2-user@$public_ip "
-            cd /home/ec2-user
+            cd /var/www/html
             aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/app_$(date +"%Y-%m-%d").tar.gz  .
             sudo tar -xzvf app_$(date +"%Y-%m-%d").tar.gz
             "
         done
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: ${{ secrets.AWS_REGION }}
-        
-
-        
-    - name: Generate presigned URL for S3 object
-      id: presigned_url
-      run: |
-         object_url=$(aws s3 presign s3://${{ secrets.S3_BUCKET_NAME }}/app_$(date +"%Y-%m-%d").tar.gz)
-         echo "Object URL: $object_url"
-         echo "::set-output name=url::$object_url"  # Set the URL as an output for later steps
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: ${{ secrets.AWS_REGION }}
-
-    - name: Open URL in browser
-      if: success()
-      run: |
-         url="${{ steps.presigned_url.outputs.url }}"
-         # curl -sSL "$url" | xdg-open /dev/stdin  # Open the URL in the default web browser
-         xdg-open "$url" || echo "Unable to open URL"
-         echo "$url"
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
