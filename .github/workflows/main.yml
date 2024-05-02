@@ -22,6 +22,7 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}      
       
     - name: Create archive
+      id: object
       run: |
         git archive --format=tar.gz -o app_$(date +"%Y-%m-%d").tar.gz HEAD
         s3object=$(echo "app_${DATE}.tar.gz")
@@ -63,19 +64,16 @@ jobs:
         # Get the instance IDs of instances in the Auto Scaling Group
         export VMs=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name ${{ secrets.ASG_NAME }} --query 'AutoScalingGroups[].Instances[].InstanceId' --output text)
         echo "VMs IDs: $VMs"
-
+        echo '${{ secrets.S3_BUCKET_NAME }}'
+        echo '${{ needs.build.outputs.s3object }}'
         object_url=$(aws s3 presign s3://${{ secrets.S3_BUCKET_NAME }}/${{ needs.build.outputs.s3object }})
         echo "Object URL: $object_url"
-
         echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-
         echo "s3object: ${{ needs.build.outputs.s3object }}"
-
         # Iterate over each instance
         for instance_id in $instance_ids; do
           # Get the public IP address of the instance
           public_ip=$(aws ec2 describe-instances --instance-ids $instance_id --query 'Reservations[].Instances[].PublicIpAddress' --output text)
-
           # SSH into the instance and download the object from the S3 bucket
           ssh -o StrictHostKeyChecking=no -i private_key ec2-user@$public_ip "
             cd /var/www/html
@@ -84,4 +82,4 @@ jobs:
             sudo rm -rf ${{ needs.build.outputs.s3object }}
             sudo systemctl restart httpd
           "
-        done        
+        done     
