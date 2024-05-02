@@ -54,7 +54,6 @@ jobs:
             cd /home/ec2-user
             aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/app_$(date +"%Y-%m-%d").tar.gz  .
             sudo tar -xzvf app_$(date +"%Y-%m-%d").tar.gz
-            sudo systemctl restart apache2
             "
         done
       env:
