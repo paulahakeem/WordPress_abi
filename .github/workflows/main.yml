@@ -50,7 +50,7 @@ jobs:
         for instance_id in $instance_ids; do
           public_ip=$(aws ec2 describe-instances --instance-ids $instance_id --query 'Reservations[].Instances[].PublicIpAddress' --output text)
   
-          ssh -o StrictHostKeyChecking=no -i KEY_PEM ubuntu@$public_ip "
+          ssh -o StrictHostKeyChecking=no -i KEY_PEM ec2-user@$public_ip "
             cd /home/ubuntu
             aws s3 cp s3://${{ secrets.S3_BUCKET }}/app_$(date +"%Y-%m-%d").tar.gz  .
             sudo tar -xzvf app_$(date +"%Y-%m-%d").tar.gz
