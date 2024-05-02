@@ -49,62 +49,35 @@ jobs:
   deploy:
     # needs: build
     runs-on: ubuntu-latest
-
-    steps:
-    - uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-region: ${{ secrets.AWS_REGION }}
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-    - name: Deploy to Auto Scaling Group
-      env:
-        PRIVATE_KEY: ${{ secrets.PRIVATE_KEY_PEM }}
-  #     run: |
-  #       # Get the instance IDs of instances in the Auto Scaling Group
-  #       export VMs=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name ${{ secrets.ASG_NAME }} --query 'AutoScalingGroups[].Instances[].InstanceId' --output text)
-  #       echo "VMs IDs: $VMs"
-  #       echo '${{ secrets.S3_BUCKET_NAME }}'
-  #       echo '${{ needs.build.outputs.s3object }}'
-  #       # object_url=$(aws s3 presign s3://${{ secrets.S3_BUCKET_NAME }}/${{ needs.build.outputs.s3object }})
-  #       # echo "Object URL: $object_url"
-  #       echo "${{ secrets.EC2_KEY }}" > EC2_KEY.pem  && chmod 600 EC2_KEY.pem
-  #       echo "s3object: ${{ needs.build.outputs.s3object }}"
-  #       # Iterate over each instance
-  #       for instance_id in $instance_ids; do
-  #         # Get the public IP address of the instance
-  #         public_ip=$(aws ec2 describe-instances --instance-ids $instance_id --query 'Reservations[].Instances[].PublicIpAddress' --output text)
-  #         # SSH into the instance and download the object from the S3 bucket
-  #         echo $public_ip
-  #            ssh -o StrictHostKeyChecking=no -i  EC2_KEY.pem ec2-user@$public_ip "
-  #           cd /var/www/html
-  #           pwd
-  #           aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/app_$(date +"%Y-%m-%d").tar.gz  .
-  #           sudo tar -xvzf ${{ needs.build.outputs.s3object }}
-  #           ls
-  #           sudo rm -rf ${{ needs.build.outputs.s3object }}
-  #           sudo systemctl restart httpd
-            
-          
-            
-  #           "
-  #       done     
-        run: |
-         echo "Pushing to ASG"
-         instance_ids=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name ${{ secrets.ASG_NAME }} --query 'AutoScalingGroups[].Instances[].InstanceId' --output text)
-         echo $instance_ids
-         echo "${{ secrets.EC2_KEY }}" > PEM_FILE && chmod 600 PEM_FILE
-         cat PEM_FILE
-         echo $instance_ids 
-        
-         for instance_id in $instance_ids; do
-           public_ip=$(aws ec2 describe-instances --instance-ids $instance_id --query 'Reservations[].Instances[].PublicIpAddress' --output text)
   
-          ssh -o StrictHostKeyChecking=no -i PEM_FILE ec2-user@$public_ip "
-            cd /home/ec2-user
-            aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/app_$(date +"%Y-%m-%d").tar.gz  .
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  
+      - name: Deploy to Auto Scaling Group
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY_PEM }}
+  
+        run: |
+          echo "Pushing to ASG"
+          instance_ids=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name ${{ secrets.ASG_NAME }} --query 'AutoScalingGroups[].Instances[].InstanceId' --output text)
+          echo $instance_ids
+          echo "${{ secrets.EC2_KEY }}" > PEM_FILE && chmod 600 PEM_FILE
+          cat PEM_FILE
+          echo $instance_ids 
+          
+          for instance_id in $instance_ids; do
+            public_ip=$(aws ec2 describe-instances --instance-ids $instance_id --query 'Reservations[].Instances[].PublicIpAddress' --output text)
+    
+            ssh -o StrictHostKeyChecking=no -i PEM_FILE ec2-user@$public_ip "
+              cd /home/ec2-user
+              aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/app_$(date +"%Y-%m-%d").tar.gz  .
             "
-         done
+          done
+
         
   # deploy:
   #   runs-on: ubuntu-latest
