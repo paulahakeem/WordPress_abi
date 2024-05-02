@@ -68,7 +68,7 @@ jobs:
           echo "${{ secrets.EC2_KEY }}" > PEM_FILE && chmod 600 PEM_FILE
           cat PEM_FILE
           echo $instance_ids 
-          
+          echo $(aws s3 ls)
           for instance_id in $instance_ids; do
             public_ip=$(aws ec2 describe-instances --instance-ids $instance_id --query 'Reservations[].Instances[].PublicIpAddress' --output text)
     
