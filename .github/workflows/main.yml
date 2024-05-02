@@ -45,7 +45,6 @@ jobs:
         cat KEY_PEM
         echo $instance_ids 
         
-        # instance_ids=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name  ${{ secrets.ASG_NAME }} --query 'AutoScalingGroups[].Instances[].InstanceId' --output text)
         
         for instance_id in $instance_ids; do
           public_ip=$(aws ec2 describe-instances --instance-ids $instance_id --query 'Reservations[].Instances[].PublicIpAddress' --output text)
