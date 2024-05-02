@@ -25,7 +25,7 @@ jobs:
       id: object
       run: |
         git archive --format=tar.gz -o app_$(date +"%Y-%m-%d").tar.gz HEAD
-        s3object=$(echo "app_${DATE}.tar.gz")
+        s3object=$(echo "app_$(date +"%Y-%m-%d").tar.gz")
         echo "s3object=$s3object" >> $GITHUB_OUTPUT
         echo "S3 Object: $s3object"
     - name: Upload to S3
